@@ -7,7 +7,7 @@ import cv2
 
 ld()
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-model = genai.GenerativeModel(model_name="gemini-1.5-pro")
+model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
 def processa_imagem(image):
     try:

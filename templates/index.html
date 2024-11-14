@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colect Image</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="p-5">
+  <h1 class="text-2xl font-bold mb-5">Colect Image</h1>
+
+  <form class="grid gap-3">
+    <input type="file" name="file" id="file" class="border p-3">
+    <input type="submit" value="Upload Image" class="submit border p-3 bg-blue-500 text-white cursor-pointer">
+  </form>
+
+  <!-- Feedback de Carregamento -->
+  <div class="loading-message mt-5" style="display: none;">
+    <p class="text-lg text-blue-500">Processando imagem...</p>
+  </div>
+
+  <div class="grid gap-3 mt-5" id="images">
+    <h2 class="font-bold">Images</h2>
+
+    <!-- Imagem Carregada -->
+    <div class="border">
+      <img class="uploadedImg w-50" src="" alt="Imagem carregada" />
+    </div>
+
+    <!-- Descrição Gerada -->
+    <div class="description-container mt-5">
+      <h3 class="font-semibold">Descrição da Imagem:</h3>
+      <p id="descriptionText"></p>
+      <!-- Link para o arquivo MP3 gerado -->
+      <a id="audioLink" href="#" target="_blank" class="text-blue-500 mt-3 inline-block">Baixar Descrição em Áudio</a>
+    </div>
+  </div>
+
+  <script src="../static/js/script.js"></script>
+</body>
+
+</html>

@@ -1,5 +1,7 @@
 .venv
 *.jpg
 *.mp3
+*.png
+*.wav
 
 .env

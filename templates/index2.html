@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capturar e Enviar Imagem e Áudio</title>
+  <script defer>
+    let audioRecorder; // Variável para armazenar o gravador de áudio
+    let audioChunks = []; // Para armazenar os pedaços do áudio
+    let audioBlob; // Para armazenar o áudio final gravado
+
+    // Função para abrir a câmera
+    function abrirCamera() {
+      const video = document.getElementById("video");
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then((stream) => {
+          video.srcObject = stream;
+        })
+        .catch((error) => console.error("Erro ao acessar a câmera: ", error));
+    }
+
+    // Função para capturar a imagem
+    function capturarImagem() {
+      const canvas = document.getElementById("canvas");
+      const video = document.getElementById("video");
+      const contexto = canvas.getContext("2d");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+
+    // Função para enviar a imagem e o áudio
+    function enviarImagemEAudio() {
+      const canvas = document.getElementById("canvas");
+      const formData = new FormData();
+
+      // Envia a imagem
+      canvas.toBlob((imageBlob) => {
+        formData.append("image", imageBlob, "captura.png");
+
+        // Envia o áudio, se disponível
+        if (audioBlob) {
+          formData.append("audio", audioBlob, "gravacao.wav");
+        }
+
+        // Envia ambos (imagem e áudio) para o servidor
+        fetch("/upload", {  // Corrija o endpoint conforme necessário
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => console.log("Imagem e Áudio enviados: ", data))
+          .catch((error) => console.error("Erro ao enviar a imagem e áudio: ", error));
+      }, "image/png");
+    }
+
+    // Função para iniciar a gravação de áudio
+    function iniciarGravacao() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then((stream) => {
+          audioRecorder = new MediaRecorder(stream);
+          audioRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+          };
+          audioRecorder.onstop = () => {
+            audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
+            mostrarAudioGravado(audioBlob);  // Exibe o reprodutor de áudio
+          };
+          audioRecorder.start();
+        })
+        .catch((error) => console.error("Erro ao acessar o microfone: ", error));
+    }
+
+    // Função para parar a gravação de áudio
+    function pararGravacao() {
+      if (audioRecorder) {
+        audioRecorder.stop();
+      }
+    }
+
+    // Função para mostrar o reprodutor de áudio gravado
+    function mostrarAudioGravado(audioBlob) {
+      const audioContainer = document.getElementById("audioContainer");
+
+      // Criando um elemento de áudio
+      const audioElement = document.createElement("audio");
+      audioElement.controls = true;  // Exibe controles (play, pause, volume)
+      const audioUrl = URL.createObjectURL(audioBlob);
+      audioElement.src = audioUrl;
+
+      // Limpa o container e adiciona o novo reprodutor
+      audioContainer.innerHTML = '';  // Limpa qualquer áudio anterior
+      audioContainer.appendChild(audioElement);
+    }
+
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js"></script>
+
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-4 text-center">Capturar, Enviar Imagem e Áudio</h1>
+
+    <div class="mb-4">
+      <video id="video" class="rounded-lg w-full h-auto border border-gray-300" autoplay></video>
+    </div>
+
+    <div class="mb-4">
+      <canvas id="canvas" class="rounded-lg w-full h-auto border border-gray-300"></canvas>
+    </div>
+
+    <div class="flex space-x-4">
+      <button onclick="abrirCamera()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+        Abrir Câmera
+      </button>
+      <button onclick="capturarImagem()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+        Capturar Imagem
+      </button>
+      <button onclick="enviarImagemEAudio()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600">
+        Enviar Imagem e Áudio
+      </button>
+    </div>
+
+    <div class="mt-8">
+      <button onclick="iniciarGravacao()" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600">
+        Iniciar Gravação
+      </button>
+      <button onclick="pararGravacao()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+        Parar Gravação
+      </button>
+    </div>
+
+    <!-- Container para exibir o reprodutor de áudio -->
+    <div id="audioContainer" class="mt-4"></div>
+  </div>
+</body>
+
+</html>
